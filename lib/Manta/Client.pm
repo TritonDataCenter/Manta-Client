@@ -2,12 +2,12 @@ package Manta::Client;
 
 use strict;
 use warnings;
-use Carp qw(croak);
+use Carp 'croak';
 use Crypt::OpenSSL::RSA;
-use MIME::Base64 qw(encode_base64);
+use MIME::Base64 'encode_base64';
 use Net::SSH::Perl::Key;
 use LWP::UserAgent;
-use Data::Dumper;
+use JSON::Parse 'parse_json';
 
 sub new {
 	my $class = shift;
@@ -42,6 +42,7 @@ sub _request {
 	$h->header(date => $date);
 	$h->header('Authorization' => "Signature keyId=\"/$self->{user}/keys/$fingerprint\",algorithm=\"rsa-sha256\",signature=\"$signature\"");
 	my $ua = LWP::UserAgent->new;
+	$ua->default_headers($h);
 	my $response;
 	if ($params{method} eq "GET") {
 		$response = $ua->get("$self->{url}/$params{path}");
@@ -84,6 +85,21 @@ sub rm {
 sub mkdir {
 	my ($self, $path) = @_;
 	return $self->put(path => $path, "content-type" => "application/json; type=directory");
+}
+
+sub ls {
+	# FIXME - limited to 256 objects
+	my ($self, $path) = @_;
+	my $response = $self->_request(path => $path, method => "GET");
+	if ($response) {
+		my %results;
+		foreach(split '\n', $response) {
+			my $json = parse_json($_);
+			$results{$json->{name}} = { type => $json->{type}, mtime => $json->{mtime}, size => $json->{size}, etag => $json->{etag} };
+		}
+		return \%results;
+	}
+	return undef;
 }
 
 1;

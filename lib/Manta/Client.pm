@@ -4,10 +4,10 @@ use strict;
 use warnings;
 use Carp 'croak';
 use Crypt::OpenSSL::RSA;
+use JSON::Parse 'parse_json';
+use LWP::UserAgent;
 use MIME::Base64 'encode_base64';
 use Net::SSH::Perl::Key;
-use LWP::UserAgent;
-use JSON::Parse 'parse_json';
 
 sub new {
 	my $class = shift;
@@ -41,8 +41,7 @@ sub _request {
 	my $h = HTTP::Headers->new(%{$params{headers}});
 	$h->header(date => $date);
 	$h->header('Authorization' => "Signature keyId=\"/$self->{user}/keys/$fingerprint\",algorithm=\"rsa-sha256\",signature=\"$signature\"");
-	my $ua = LWP::UserAgent->new;
-	$ua->default_headers($h);
+	my $ua = LWP::UserAgent->new(default_headers => $h);
 	my $response;
 	if ($params{method} eq "GET") {
 		$response = $ua->get("$self->{url}/$params{path}");

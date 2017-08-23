@@ -1,4 +1,4 @@
-package Manta::Client 0.4;
+package Manta::Client 0.5;
 
 use strict;
 use warnings;

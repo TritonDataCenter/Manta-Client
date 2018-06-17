@@ -3,7 +3,7 @@
 Manta::Client is a Perl module for interacting with Joyent's [Manta](http://https://apidocs.joyent.com/manta/) system.
 
 ## Obtaining:
- * http://search.cpan.org/~andrewh/Manta-Client/
+ * https://metacpan.org/release/Manta-Client
  * https://github.com/joyent/Manta-Client
 
 ## Requires:
